@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: christ-ai-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python ragserver.py

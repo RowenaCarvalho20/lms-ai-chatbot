@@ -4,3 +4,6 @@ sentence-transformers
 numpy
 faiss-cpu
 pypdf
+flask-cors
+requests
+mysql-connector-python

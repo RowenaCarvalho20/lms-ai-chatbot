@@ -1,0 +1,268 @@
+Think about the last time you tried to find the shortest route to a new destination. Were you searching breadth-first by considering all possible turns at each intersection, or perhaps depth-first by following one complete route before trying alternatives? As we explore search algorithms, consider how they mirror our own decision-making processes in everyday life.
+
+
+These search algorithms fall under two categories - the first is uninformed search and the second is informed search. Before we proceed, we will familiarize ourselves with some search algorithm terminologies. Searching as we have already defined is a step-by-step procedure to solve a search-problem in a given search space. There are three main factors that a search problem can have:
+
+
+The first is search space which represents a set of possible solutions, which a system may have. The second is the start or initial state which is a state from which the agent begins the search. The third is a goal test which is a function that observes the current state and returns whether the goal state is achieved or not.
+
+A few more terminologies important to our discussion are:
+A search tree, which is a tree representation of a search problem. Looking at the diagram, we see that a tree comprises nodes like A, B, C and so on which are the states in our search space and the edges which are the lines connecting the nodes define the function or cost to reach the successive state to which it is connected. The root which is Node A here of the search tree corresponds to the initial state.
+
+
+The second terminology is the actions which gives the description of all the available actions to the agent. Basically, an action is defined by a particular edge or path which leads to another state. The third is the transition model which is a representation of what each action does, like taking an action x from Node A will result in the state changing to Node C.
+
+
+The next is the path cost which is a function which assigns a numeric cost to each path. The next is the solution which is an action sequence which leads from the start node to the goal node. The last is the optimal solution which is defined as that solution which has the lowest cost among all the solutions.
+
+
+Now how do we evaluate a solution given by a search algorithm which achieves the goal state in a search problem? For this, we have a few search strategy evaluation measures to evaluate various algorithms:
+
+
+The first is completeness. This measure checks whether a solution will always be found if one exists, that is, whether a goal state will always be achieved or not. The second is time. By time we mean a measure which defines how long it takes to find the solution. Often represented as the number of nodes searched. This is often denoted using Big O notation.
+
+
+The third measure is space, which defines how much memory is needed to perform the search. This is often represented as the maximum number of nodes stored at once and also denoted using Big O notation. The fourth measure is optimality, which checks if the optimal solution with the least cost can be found.
+
+
+Now, let us look again into the tree structure and understand further how time and space complexity are measured: The first is b which stands for branching factor. The branching factor refers to the number of children at each node in a tree. So in our example, the branching factor of Node A is two.
+
+
+Next is m which is the maximum depth of the state space. Looking at our tree as the state space, the number of levels in the tree is known as the depth. So in our tree we have Node A
+
+at level 0, Node B and C at level 1, Node D, E and F at level 2 and Node G at level 3, so together there are 4 levels which makes the maximum depth of the tree m equal to 4.
+
+
+The third measure is d which is depth of the least cost solution. Suppose the most optimal solution is found at the goal state of Node C, so that value of d will be 2 since the depth at Node C is 2.
+
+
+
+
+
+
+
+
+
+
+
+
+Programme:
+M.Sc. AIML
+Course:
+Artificial Intelligence
+Unit:
+2
+Topic:
+Uninformed Search Strategies- BFS.
+Faculty:
+Helen K Joy
+Hello and welcome back
+
+We will begin with Uninformed Search Strategies or Algorithms.
+
+The Search Algorithms under the category of Uninformed Search Strategies do not have any domain knowledge which means that the strategies have no additional information about states beyond that provided in the problem definition. Hence they are also called blind search. It examines each node of the search tree until it achieves the goal state. All they can do is generate successors and distinguish a goal state from a non-goal state.
+
+All search strategies that we will discuss are distinguished on the basis of the order in which the nodes of the search tree are expanded.
+.lets start with Breadth First Search, which is one of the fundamental uninformed search strategies.
+
+Breadth First Search, as the name suggests, explores the search space by first expanding the root node, then all the successors of the root node, followed by their successors, and so on. In other words, all nodes at a given depth or level in the search tree are expanded before any nodes at the next level.
+
+Let's understand the algorithm step by step. Breadth First Search is an implementation of the general graph-search algorithm where the shallowest unexpanded node is chosen for expansion. This is achieved by using a FIFO queue (First In First Out) for the frontier. New nodes, which are deeper than their parents, go to the back of the queue, while the shallower old nodes get expanded first.
+
+There's an important detail to note: in Breadth First Search, the goal test is applied to each node when it is generated rather than when it is selected for expansion. This is an optimization that we'll explain when discussing time complexity.
+
+We can see the pseudocode for the Breadth First Search algorithm. The algorithm begins with the initial state and checks if it's a goal state. If not, it places this node in a FIFO queue called the frontier. The algorithm then enters a loop where it repeatedly removes the shallowest node from the frontier, adds it to the explored set, and then expands it by generating all its successors.
+
+
+
+
+
+
+
+For each successor that hasn't been explored or isn't already in the frontier, the algorithm checks if it's a goal state. If it is, the solution is
+returned; otherwise, the node is added to the frontier for its successors to be added in the next iterations. This process continues until either a goal state is found or the frontier becomes empty, which indicates that no solution exists.
+
+Let us take an example to illustrate the progress of Breadth First Search on a simple binary tree. The triangular marker indicates which node is being expanded at each stage. Notice how the algorithm systematically works its way through each level of the tree.
+
+In our tree we have seven nodes labeled A to G, with A as the root node. The depth is 3 and the branching factor of each node is 2 since it is a binary tree. So the BFS algorithm will first check the first level, which contains the root node and check if it is a Goal State. Since it is not, its successors B and C are added to the FIFO queue frontier. So now the frontier contains B and C. Now, it pops B from the queue and checks if it is a goal state, since it isn't, its successors or children are added to the queue frontier, so now the queue contains C, D and E. In the next iteration, C is popped from the queue and checked if it is a goal state, which it is not and so its children are added to the queue. Now the frontier queue contains D, E, F and G. So next, D is popped from the queue and it is checked if it is a goal state and so the process continues until the goal state is achieved.
+
+Now, let's evaluate Breadth First Search based on our evaluation criteria:
+
+First, for Completeness: Breadth First Search is complete. If a goal node exists at some finite depth d, the algorithm will eventually find it after exploring all shallower nodes, provided the branching factor is finite. An important observation is that as soon as a goal node is generated, we know it's the shallowest goal node because all shallower nodes must have already been generated and failed the goal test.
+
+Second, for Optimality: The shallowest goal node is not necessarily the optimal one. However, Breadth First Search is optimal if the path cost is a non-decreasing function of the depth of the node. The most common scenario where this holds true is when all actions have the same cost.
+
+Now, let's examine the Time and Space complexity, which reveals some limitations of this algorithm.
+
+Consider a uniform tree where every state has b successors where the branching factor is b. The root node generates b nodes at the first level. Each of these generates b more nodes, resulting in b  nodes at the second level. This pattern continues with b  nodes at the third level, and so on.
+
+If the solution is at depth d, then in the worst case, it's the last node generated at that level. The total number of nodes generated would be b + b  + b  + ... + b?, which is O(b?), as the Big O notations takes only the worst case into consideration and that is why b? is taken while the rest b + b  + b  and so on is discarded.
+
+For space complexity, every node generated remains in memory in any graph search algorithm in the queues frontier or explored as per the pseudo-code. There will be O(b?? ) nodes in the explored set and O(b?) nodes in the frontier, making the space complexity O(b?).
+
+
+
+
+
+
+
+
+The table demonstrates just how quickly these exponential complexity
+bounds become problematic. For a branching factor of 10, even at moderate depths, the time and memory requirements become astronomical. For instance, at depth 12, the search would require 13 days of computation time and 1 petabyte of memory which shows the inefficiency in time and space management when the state space increases in size.
+
+Two important lessons can be drawn from this analysis. First, memory requirements are often a bigger constraint for Breadth First Search than execution time. While one might be willing to wait 13 days for an important problem solution, the memory requirements often exceed practical limits.
+
+Second, time remains a critical factor. With our assumptions, a problem with a solution at depth 16 would take about 350 years for Breadth First Search to solve. This highlights a fundamental limitation: exponential-complexity search problems generally cannot be solved by uninformed methods except for the smallest instances.
+
+Next, we will look at other uninformed search strategies that attempt to address some of these limitations, particularly the memory constraints of Breadth First Search.
+
+After examining Breadth First Search, we now move on to Uniform Cost Search, which addresses some limitations of BFS, particularly when step costs are not equal.
+
+When all step costs are equal, breadth-first search is optimal because it always expands the shallowest unexpanded node. But what happens when different actions have different costs? This is where Uniform Cost Search comes into play.
+
+Instead of expanding the shallowest node, Uniform Cost Search expands the node with the lowest path cost g(n). This is achieved by storing the frontier as a priority queue ordered by path cost. A priority queue is different from a normal queue in that the items of the priority queue have some order, where the item at the front of the queue has a higher priority according to some predefined value, which is PATH-COST here. Items are inserted according to priority value and not at the end of the queue.
+There are three key differences between Uniform Cost Search and Breadth First Search:
+
+First, the frontier is implemented as a priority queue ordered by path cost rather than a FIFO queue.
+
+Second, the goal test is applied to a node when it is selected for expansion rather than when it is first generated. This is a critical difference because the first goal node generated may not be on the optimal path.
+
+Third, there is an additional check to see if a better path is found to a node currently on the frontier. If a new path to a state already in the frontier has a lower cost than the existing path, the old path is replaced with the new one.
+
+Let's understand this with an example of a familiar problem which we have explored before which is to find the optimal path from the Bangalore Central Campus to the Pune Lavasa Campus at Christ University.
+
+Campus and the Yeshwanthpur Campus, with travel costs of 80 and 99
+respectively. Since the Bannerghatta Road Campus has the lowest cost (80), it is expanded first, adding the Kengeri Campus with a total path cost of 80 + 97 = 177.
+
+The frontier now contains the Yeshwanthpur Campus (cost 99) and the Kengeri Campus (cost 177). Since the Yeshwanthpur Campus has the lowest cost, it is expanded next, adding the Pune Lavasa Campus with a total path cost of 99 + 211 = 310.
+
+At this point, a goal node (Pune Lavasa Campus) has been generated, but Uniform Cost Search doesn't stop here. It continues by expanding the Kengeri Campus, which adds another path to the Pune Lavasa Campus via the Kengeri Campus with a total cost of 80 + 97 + 101 = 278.
+Now the algorithm checks if this new path to the Pune Lavasa Campus is better than the existing one. Since 278 is less than 310, the old path is discarded, and the new path is kept. Finally, the Pune Lavasa Campus, now with a cost of 278, is selected for expansion, and the optimal solution is returned.
+
+In this example, the optimal path from the Central Campus to the Pune Lavasa Campus is not the one with fewer steps (Central ? Yeshwanthpur ? Pune Lavasa) but rather the one with the lowest total cost (Central ? Bannerghatta ? Kengeri ? Pune Lavasa), showing how Uniform Cost Search prioritizes total path cost over the number of steps.
+Let's evaluate Uniform Cost Search based on our criteria:
+
+For Completeness: Uniform Cost Search is complete, provided that the cost of every step exceeds some small positive constant e. However, it can get stuck in an infinite loop if there is a path with an infinite sequence of zero-cost actions.
+For Optimality: Uniform Cost Search is optimal in general. Whenever it selects a node for expansion, the optimal path to that node has been found. And since step costs are non-negative, paths never get shorter as nodes are added. Thus, the first goal node selected for expansion must be the optimal solution.
+
+For Time and Space Complexity: The complexity of Uniform Cost Search is not easily characterized in terms of branching factor b and depth d like Breadth First Search. Instead, if C* is the cost of the optimal solution where * indicates the optimal value of C and every action costs at least e, then the algorithm's worst-case time and space complexity is O(b^(1+C*/e)). This can be much greater than b^d because Uniform Cost Search might explore large trees of small steps before exploring paths involving large (and perhaps useful) steps.
+
+When all step costs are equal, Uniform Cost Search behaves similarly to Breadth First Search, except that Breadth First Search stops as soon as it generates a goal, whereas Uniform Cost Search examines all nodes at the goal's depth to ensure it has found the lowest-cost path.
+
+To put this in a real-world context, think about navigating through a city using GPS. If you're looking for the shortest distance route (all steps have equal cost), Breadth First Search works well. But if you're looking for the fastest route, where different roads have different speed
+
+Search would be more appropriate because it considers the cost of each step rather than just the number of steps.
+
+In our next segment, we will explore Depth First Search, another fundamental uninformed search strategy with different properties and applications.
+
+See you in our next session! Happy Learning!
+
+
+
+
+
+
+
+
+
+
+Programme:
+M.Sc. AIML
+Course:
+Artificial Intelligence
+Unit:
+2
+Topic:
+Uninformed Search Strategies- DFS
+Faculty:
+Helen K Joy
+Hello and welcome to the artificial intelligence session. Let's continue our discussion by exploring Depth First Search, another fundamental uninformed search strategy.
+
+Depth First Search, as the name suggests, always expands the deepest node in the current frontier of the search tree. Unlike Breadth First Search, which explores level by level, Depth First Search plunges immediately to the deepest level of the search tree, where nodes have no successors.
+
+As these deepest nodes are expanded, they are removed from the frontier, causing the search to "back up" to the next deepest node that still has unexplored successors. This behaviour comes from the implementation: while Breadth First Search uses a FIFO (First-In-First-Out) queue, Depth First Search uses a LIFO (Last-In-First-Out) queue or in more general terms, a stack. A LIFO queue or stack ensures that the most recently generated node is chosen for expansion, which must be the deepest unexpanded node.
+
+Let us see how this is implemented.
+Since frontier here is a LIFO stack, new successors will be added to the beginning of the queue. In our binary tree we have 15 nodes, labeled A to O and have a depth of 4.
+
+According to DFS, the root node is traversed first and checked if it is a goal state. If it isn't, then its children B and C, are pushed to the frontier queue. Here, C is pushed first followed by B. Since B at the front of the queue, it is traversed next and checked if it is a goal state, if not then its children D and E are pushed, where E is pushed followed by D so the frontier now contains, D, E and C. Next node to be traversed is D since it is at the front of the queue. It checks if it is a goal state and since it is not, its successors are pushed to the queue H and I. So Now the queue frontier contains H, I, E and C. Now, H is a leaf node, it is traversed and checked if it is a goal state. If it is not and since it has no children to push, the next node at the front of the queue is traversed, which is I. And check if it is a goal state. Since I also doesn't have any children to push, the algorithm moves on to Node E which is at the front of the queue, it is checked if it is a goal state and then if it is not, its children are pushed to the queue so now frontier contains J, K and C. In a similar way it keeps popping nodes from the queue and pushing them if they have any children till it finds the goal state, which is M in this case. As we can see from the example we can understand why it is called Depth First as the deepest node in the branch is searched first, like how the tree traversed from A, B, D and finally H and then proceeded to other sub branches. This is how Depth First Search works.
+
+whether  the  graph-search  or  tree-search  version  is  used.  The
+graph-search version, which avoids repeated states and redundant paths, is complete in finite state spaces because it will eventually expand every node. However, the tree-search version is not complete. For instance, if there is a loop in the state space, like going from Central Campus to Bannerghatta Campus and back to Central Campus repeatedly, the algorithm could get trapped in an infinite loop.
+
+Depth First tree search can be modified without additional memory cost to check new states against those on the path from the root to the current node. This prevents infinite loops in finite state spaces but doesn't eliminate redundant paths. In infinite state spaces, both versions fail if they encounter an infinite non-goal path.
+
+Neither version of Depth First Search is optimal. If we look at our example tree again, if node C were a goal node, Depth First Search would still explore the entire left subtree before finding it. And if both node C and node J were goal nodes, Depth First Search might return J as the solution instead of C, even though C would be at a shallower depth and therefore a better solution.
+
+Regarding time complexity, Depth First graph search is bounded by the size of the state space, which could be infinite. Depth First tree search, however, may generate all O(b^m) nodes in the search tree, where m is the maximum depth of any node. This can be much larger than the size of the state space, and m itself can be much larger than d which is the depth of the shallowest solution,
+
+So far, Depth First Search may seem inferior to Breadth First Search, but its major advantage lies in space complexity. While there's no advantage for graph search, a Depth First tree search needs to store only a single path from the root to a leaf node, along with the remaining unexpanded sibling nodes for each node on the path. Once a node has been expanded, it can be removed from memory as soon as all its descendants have been fully explored, like how the nodes kept getting removed from the queue and were not stored anymore if they were not a goal state. For a state space with branching factor b and maximum depth m, Depth First Search requires storage of only O(bm) nodes, which is linear space!
+
+This dramatic space efficiency has made Depth First tree search the fundamental technique in many areas of AI, including constraint satisfaction, propositional satisfiability, and logic programming.
+
+There is a variation of Depth First Search called backtracking search which achieves even greater memory efficiency which you can explore.
+Moving on, let's briefly explore another uninformed search strategy: Depth-Limited Search.
+
+Depth-Limited Search is a straightforward modification of Depth First Search that addresses one of its major weaknesses: the potential to get lost in infinite paths. As the name suggests, this algorithm imposes a predetermined depth limit l on the search. The value of l is a limit at which depth the algorithm cannot proceed further, thus stopping the algorithm at a certain point. Nodes at depth l are treated as if they have no successors, effectively cutting off the search at that point.
+
+The algorithm has a recursive implementation of depth-limited tree search. The algorithm
+
+depth-first search but returns a special "cutoff" value when the depth limit is reached.
+
+The depth limit successfully solves the infinite-path problem that plagues standard Depth First Search. However, you may have guessed that it introduces a new source of incompleteness- that if the shallowest goal state is beyond the depth limit l, the algorithm will fail to find it.
+
+The time complexity is O(b^l) and the space complexity is O(bl).
+
+We can view standard Depth First Search as a special case of Depth-Limited Search with
+l = 8 (in?nite)
+
+This algorithm comes to use in cases where we can set appropriate depth limits based on knowledge of the problem. For instance, on a map with 20 cities, we know that any solution path can't be longer than 19 steps. With deeper analysis, we might determine that any city can be reached from any other in at most 9 steps (the diameter of the state space), providing a more efficient depth limit.
+
+However, for most problems, determining a good depth limit in advance is difficult. Too shallow a limit risks incompleteness, while too deep a limit reduces the space efficiency advantage.
+
+Depth-Limited Search can terminate with two types of failure: standard failure indicating no solution exists, or cutoff failure indicating no solution within the specified depth limit.
+Overall, Depth-Limited Search offers a practical compromise that keeps the space efficiency of Depth First Search while avoiding its problems with infinite paths, making it useful when we have some idea about the solution's depth, that is the depth at which the goal state may appear.
+
+After examining Depth-Limited Search, we now come to Iterative Deepening Search, which addresses the key question: what is the right depth limit to use?
+
+Iterative Deepening Search elegantly solves this problem by running Depth-Limited Search repeatedly with increasing depth limits - starting at 0, then 1, 2, and so on - until either a solution is found or we determine that no solution exists. As we can see from our figure, the first time the limit is 0 only nodes at level 0 are traversed and returns the cutoff value 0. Then it is repeated with limit as 1 which explores all the nodes till level 1 and returns the cutoff value 1. The next calls with limit as 2 which explores all nodes till level 2 and returns the cutoff value 2. And finally, the algorithm runs with limit as 3 where it explores all nodes till level 3 where it finds M as the goal state which is returned instead of the cutoff value. Here four iterations are needed to find the goal state.
+
+So the algorithm is straightforward: we begin with a depth limit of 0 and repeatedly call Depth-Limited Search, incrementing the limit each time. When the search returns anything other than "cutoff," we've either found a solution or confirmed none exists.
+
+A common concern is that this approach seems wasteful since we regenerate states multiple
+
+think. In most search trees, the vast majority of nodes appear at the
+deepest levels. With a branching factor of b, the total number of nodes generated gives us a time complexity of O(b^d), the same as Breadth First Search.
+
+For space complexity, Iterative Deepening Search requires only O(bd) memory - the same as Depth First Search and much better than the O(b^d) needed by Breadth First Search.
+
+
+
+
+
+
+
+
+
+
+Programme:
+M.Sc. AIML
+Course:
+Artificial Intelligence
+Unit:
+2
+Topic:
+Uninformed Search Strategies Bidirectional Search.
+Faculty:
+Helen K Joy
+Hello and welcome to the next session on Bidirectional Search, the uninformed search strategy, which takes a fundamentally different approach from the previous methods we've discussed.
+Rather than searching exclusively from the start state toward the goal state, Bidirectional Search runs two simultaneous searches: one forward from the initial state and one backward from the goal state. The search terminates when these two frontiers meet in the middle, establishing a complete path from start to goal.
+The motivation behind this approach is mathematical efficiency. If a solution is at depth d, a standard breadth-first search must potentially explore O(b^d) nodes. However, with bidirectional search, each direction only needs to explore to depth d/2, resulting in approximately O(b^(d/2)) nodes in each direction. This is dramatically less than a single search would require.
+For example, with a solution at depth 6 and a branching factor of 10, a standard breadth-first search might generate over a million nodes. In contrast, bidirectional search would generate just about 2,000 nodes - a reduction by a factor of 500!
+However, bidirectional search comes with challenges. The primary difficulty is how to conduct the backwards search, which requires generating predecessor states. When actions are reversible, predecessors are simply the successors in reverse. But many problems don't have easily computable predecessors.
+Additionally, the goal specification affects implementation. If we have a single goal state or a small set of explicit goal states, backward search is straightforward. However, for problems with abstractly defined goals bidirectional search becomes difficult to apply.
+The most significant limitation of bidirectional search is its space requirement. Since we need to maintain at least one of the frontiers in memory to check for intersections, the space complexity remains O(b^(d/2)), which can still be substantial for large problems.
+
+
+With that we have covered the major uninformed search strategies, six in particular and also evaluated them for completeness, time complexity, space complexity and also optimality. In our next lecture we will explore Informed Search Strategies.
+Before we conclude, consider these reflection questions: Which search strategy aligns most with your natural problem-solving approach? What kinds of problems in your field might
