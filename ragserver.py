@@ -5,7 +5,6 @@ from flask_cors import CORS
 import requests
 import mysql.connector
 import re
-
 from flask import render_template_string  # <--- Make sure to import this at the very top!
 
 # ... (keep your existing imports and config) ...
