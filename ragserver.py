@@ -5,6 +5,82 @@ from flask_cors import CORS
 import requests
 import mysql.connector
 import re
+
+from flask import render_template_string  # <--- Make sure to import this at the very top!
+
+# ... (keep your existing imports and config) ...
+
+# --------------------------------------------------
+# FRONTEND UI (The Visual Chat Window)
+# --------------------------------------------------
+@app.route("/")
+def home():
+    html_code = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>AI Course Assistant</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f0f2f5; }
+            .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+            .msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; line-height: 1.5; font-size: 14px; }
+            .user { align-self: flex-end; background: #003366; color: white; border-bottom-right-radius: 4px; }
+            .bot { align-self: flex-start; background: white; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+            .input-area { padding: 10px; background: white; border-top: 1px solid #ddd; display: flex; gap: 8px; }
+            input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 25px; outline: none; font-size: 14px; }
+            button { background: #003366; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+            .loading { font-size: 12px; color: #666; margin-left: 15px; display: none; margin-bottom: 5px; }
+        </style>
+    </head>
+    <body>
+        <div class="chat-container" id="box">
+            <div class="msg bot">👋 Hi! I'm your AI Course Assistant. Ask me anything from the syllabus!</div>
+        </div>
+        <div class="loading" id="typing">AI is thinking...</div>
+        <div class="input-area">
+            <input type="text" id="inp" placeholder="Type a question..." onkeypress="if(event.key==='Enter') send()">
+            <button onclick="send()">Send</button>
+        </div>
+
+        <script>
+            async function send() {
+                const inp = document.getElementById("inp");
+                const box = document.getElementById("box");
+                const typing = document.getElementById("typing");
+                const txt = inp.value.trim();
+                if (!txt) return;
+
+                // 1. Show User Message
+                box.innerHTML += `<div class="msg user">${txt}</div>`;
+                inp.value = "";
+                box.scrollTop = box.scrollHeight;
+                typing.style.display = "block";
+
+                try {
+                    // 2. Call Your Existing API
+                    const res = await fetch("/ask", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ question: txt })
+                    });
+                    const data = await res.json();
+                    
+                    // 3. Show Bot Response (Convert newlines to HTML breaks)
+                    const ans = data.answer.replace(/\\n/g, "<br>");
+                    box.innerHTML += `<div class="msg bot">${ans}</div>`;
+                } catch (e) {
+                    box.innerHTML += `<div class="msg bot" style="color:red">❌ Error connecting to server.</div>`;
+                }
+                
+                typing.style.display = "none";
+                box.scrollTop = box.scrollHeight;
+            }
+        </script>
+    </body>
+    </html>
+    """
+    return render_template_string(html_code)
 # --------------------------------------------------
 # CONFIG
 # --------------------------------------------------
