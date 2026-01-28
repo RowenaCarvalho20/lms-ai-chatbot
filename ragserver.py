@@ -1,13 +1,26 @@
-
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 import requests
 import mysql.connector
 import re
-from flask import render_template_string  # <--- Make sure to import this at the very top!
 
-# ... (keep your existing imports and config) ...
+# --------------------------------------------------
+# CONFIG & APP INITIALIZATION (MUST BE AT THE TOP)
+# --------------------------------------------------
+app = Flask(__name__)  # <--- THIS WAS MISSING AT THE TOP
+CORS(app)
+
+API_KEY = os.getenv("AIzaSyA_5ST3kWAsMY4GS23FLeAiPkR_-Su1Shs")
+
+TRANSCRIPT_PATH = os.path.join("transcripts", "ai_ml.txt")
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "ragdb",
+    "port": 3307
+}
 
 # --------------------------------------------------
 # FRONTEND UI (The Visual Chat Window)
@@ -80,21 +93,7 @@ def home():
     </html>
     """
     return render_template_string(html_code)
-# --------------------------------------------------
-# CONFIG
-# --------------------------------------------------
-API_KEY = os.getenv("AIzaSyA_5ST3kWAsMY4GS23FLeAiPkR_-Su1Shs")
 
-app = Flask(__name__)
-CORS(app)
-TRANSCRIPT_PATH = os.path.join("transcripts", "ai_ml.txt")
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "",
-    "database": "ragdb",
-    "port": 3307
-}
 # --------------------------------------------------
 # SAVE CHAT TO DB
 # --------------------------------------------------
@@ -115,6 +114,7 @@ def save_chat(question, answer):
         print("💾 Chat saved.")
     except Exception as e:
         print("❌ DB ERROR:", e)
+
 # --------------------------------------------------
 # TRANSCRIPT CACHE
 # --------------------------------------------------
@@ -133,12 +133,14 @@ def load_transcript():
             chunks.append(part)
     print(f"📑 Loaded {len(chunks)} chunks.")
     return chunks
+
 def get_chunks():
     if rag_cache["chunks"] is None:
         rag_cache["chunks"] = load_transcript()
     return rag_cache["chunks"]
+
 # --------------------------------------------------
-# STRICT WORD-LEVEL RANKING (FINAL FIX)
+# STRICT WORD-LEVEL RANKING
 # --------------------------------------------------
 def rank_chunks(question, chunks):
     q_words = set(re.findall(r"\b\w+\b", question.lower()))
@@ -149,6 +151,7 @@ def rank_chunks(question, chunks):
         scored.append((score, c))
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[:5]
+
 # --------------------------------------------------
 # GEMINI CALL
 # --------------------------------------------------
@@ -203,6 +206,7 @@ User Question:
         return data["choices"][0]["message"]["content"]
     except Exception:
         return "I could not extract a valid answer."
+
 # --------------------------------------------------
 # SMALL TALK
 # --------------------------------------------------
@@ -242,6 +246,7 @@ SMALLTALK = {
     "good night": "Good night! 🌙 Sleep well!",
     "gn": "Good night! 💙 Sweet dreams!"
 }
+
 # --------------------------------------------------
 # MAIN API
 # --------------------------------------------------
@@ -273,6 +278,7 @@ def ask():
     save_chat(question, answer)
     print("🤖 Final Answer:", answer)
     return jsonify({"answer": answer})
+
 # --------------------------------------------------
 # RUN SERVER
 # --------------------------------------------------
