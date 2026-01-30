@@ -1,18 +1,21 @@
+
 import os
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import mysql.connector
 import re
+# --------------------------------------------------
+# CONFIG
+# --------------------------------------------------    
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-# --------------------------------------------------
-# CONFIG & APP INITIALIZATION (MUST BE AT THE TOP)
-# --------------------------------------------------
-app = Flask(__name__)  # <--- THIS WAS MISSING AT THE TOP
+if not API_KEY:
+    raise RuntimeError("❌ GEMINI_API_KEY environment variable not set")
+
+
+app = Flask(__name__)
 CORS(app)
-
-API_KEY = os.getenv("AIzaSyA_5ST3kWAsMY4GS23FLeAiPkR_-Su1Shs")
-
 TRANSCRIPT_PATH = os.path.join("transcripts", "ai_ml.txt")
 DB_CONFIG = {
     "host": "localhost",
@@ -21,79 +24,6 @@ DB_CONFIG = {
     "database": "ragdb",
     "port": 3307
 }
-
-# --------------------------------------------------
-# FRONTEND UI (The Visual Chat Window)
-# --------------------------------------------------
-@app.route("/")
-def home():
-    html_code = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>AI Course Assistant</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f0f2f5; }
-            .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-            .msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; line-height: 1.5; font-size: 14px; }
-            .user { align-self: flex-end; background: #003366; color: white; border-bottom-right-radius: 4px; }
-            .bot { align-self: flex-start; background: white; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-            .input-area { padding: 10px; background: white; border-top: 1px solid #ddd; display: flex; gap: 8px; }
-            input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 25px; outline: none; font-size: 14px; }
-            button { background: #003366; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 600; }
-            .loading { font-size: 12px; color: #666; margin-left: 15px; display: none; margin-bottom: 5px; }
-        </style>
-    </head>
-    <body>
-        <div class="chat-container" id="box">
-            <div class="msg bot">👋 Hi! I'm your AI Course Assistant. Ask me anything from the syllabus!</div>
-        </div>
-        <div class="loading" id="typing">AI is thinking...</div>
-        <div class="input-area">
-            <input type="text" id="inp" placeholder="Type a question..." onkeypress="if(event.key==='Enter') send()">
-            <button onclick="send()">Send</button>
-        </div>
-
-        <script>
-            async function send() {
-                const inp = document.getElementById("inp");
-                const box = document.getElementById("box");
-                const typing = document.getElementById("typing");
-                const txt = inp.value.trim();
-                if (!txt) return;
-
-                // 1. Show User Message
-                box.innerHTML += `<div class="msg user">${txt}</div>`;
-                inp.value = "";
-                box.scrollTop = box.scrollHeight;
-                typing.style.display = "block";
-
-                try {
-                    // 2. Call Your Existing API
-                    const res = await fetch("/ask", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ question: txt })
-                    });
-                    const data = await res.json();
-                    
-                    // 3. Show Bot Response (Convert newlines to HTML breaks)
-                    const ans = data.answer.replace(/\\n/g, "<br>");
-                    box.innerHTML += `<div class="msg bot">${ans}</div>`;
-                } catch (e) {
-                    box.innerHTML += `<div class="msg bot" style="color:red">❌ Error connecting to server.</div>`;
-                }
-                
-                typing.style.display = "none";
-                box.scrollTop = box.scrollHeight;
-            }
-        </script>
-    </body>
-    </html>
-    """
-    return render_template_string(html_code)
-
 # --------------------------------------------------
 # SAVE CHAT TO DB
 # --------------------------------------------------
@@ -114,7 +44,6 @@ def save_chat(question, answer):
         print("💾 Chat saved.")
     except Exception as e:
         print("❌ DB ERROR:", e)
-
 # --------------------------------------------------
 # TRANSCRIPT CACHE
 # --------------------------------------------------
@@ -133,14 +62,12 @@ def load_transcript():
             chunks.append(part)
     print(f"📑 Loaded {len(chunks)} chunks.")
     return chunks
-
 def get_chunks():
     if rag_cache["chunks"] is None:
         rag_cache["chunks"] = load_transcript()
     return rag_cache["chunks"]
-
 # --------------------------------------------------
-# STRICT WORD-LEVEL RANKING
+# STRICT WORD-LEVEL RANKING (FINAL FIX)
 # --------------------------------------------------
 def rank_chunks(question, chunks):
     q_words = set(re.findall(r"\b\w+\b", question.lower()))
@@ -151,7 +78,6 @@ def rank_chunks(question, chunks):
         scored.append((score, c))
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[:5]
-
 # --------------------------------------------------
 # GEMINI CALL
 # --------------------------------------------------
@@ -183,19 +109,15 @@ Transcript Context:
 User Question:
 {question}
 """
-    url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
 
     payload = {
-        "model": "gemini-2.5-flash",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
     }
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
+    headers = {"Content-Type": "application/json"}
 
     res = requests.post(url, json=payload, headers=headers)
     data = res.json()
@@ -203,10 +125,9 @@ User Question:
     print("📌 Gemini raw:", data)
 
     try:
-        return data["choices"][0]["message"]["content"]
+        return data["candidates"][0]["content"]["parts"][0]["text"]
     except Exception:
         return "I could not extract a valid answer."
-
 # --------------------------------------------------
 # SMALL TALK
 # --------------------------------------------------
@@ -246,7 +167,6 @@ SMALLTALK = {
     "good night": "Good night! 🌙 Sleep well!",
     "gn": "Good night! 💙 Sweet dreams!"
 }
-
 # --------------------------------------------------
 # MAIN API
 # --------------------------------------------------
@@ -278,10 +198,10 @@ def ask():
     save_chat(question, answer)
     print("🤖 Final Answer:", answer)
     return jsonify({"answer": answer})
-
 # --------------------------------------------------
 # RUN SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
     print("🚀 RAG Server running at http://localhost:8000/ask")
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+
